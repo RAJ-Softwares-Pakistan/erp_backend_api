@@ -15,10 +15,10 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
-    ))),
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS',
+        env('APP_URL') ? parse_url(env('APP_URL'), PHP_URL_HOST) : ''
+    )),
+
 
     /*
     |--------------------------------------------------------------------------
