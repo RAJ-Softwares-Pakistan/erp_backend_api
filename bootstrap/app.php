@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->trustProxies(at: '*');
+        $middleware->trustHosts(at: [parse_url(env('APP_URL'), PHP_URL_HOST)]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
