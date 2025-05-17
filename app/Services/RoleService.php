@@ -33,7 +33,7 @@ class RoleService
      */
     public static function isValidRole(string $role): bool
     {
-        return in_array($role, self::getRoles());
+        return in_array($role, array_values(self::getRoles()));
     }
 
     /**
@@ -49,13 +49,11 @@ class RoleService
      */
     public static function getAllPermissions(string $role): array
     {
-        $permissions = self::getRolePermissions($role);
-        $hierarchies = self::getHierarchies();
-
-        if (isset($hierarchies[$role])) {
-            foreach ($hierarchies[$role] as $inheritedRole) {
-                $permissions = array_merge($permissions, self::getRolePermissions($inheritedRole));
-            }
+        $permissions = config('roles.permissions.' . $role, []);
+        
+        // Include permissions from subordinate roles
+        foreach (config('roles.hierarchies.' . $role, []) as $subordinateRole) {
+            $permissions = array_merge($permissions, config('roles.permissions.' . $subordinateRole, []));
         }
 
         return array_unique($permissions);
@@ -72,14 +70,12 @@ class RoleService
     /**
      * Check if a role can access another role's permissions
      */
-    public static function canAccessRole(string $role, string $targetRole): bool
+    public static function canAccessRole(string $userRole, string $targetRole): bool
     {
-        $hierarchies = self::getHierarchies();
-        
-        if (!isset($hierarchies[$role])) {
-            return false;
+        if ($userRole === $targetRole) {
+            return true;
         }
 
-        return in_array($targetRole, $hierarchies[$role]);
+        return in_array($targetRole, config('roles.hierarchies.' . $userRole, []));
     }
-} 
+}

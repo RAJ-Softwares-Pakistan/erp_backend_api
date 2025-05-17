@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User;
+use App\Services\RoleService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,11 +22,13 @@ class UserController extends Controller
      */
     public function register(RegisterUserRequest $request): JsonResponse
     {
+        // No authorization check needed for registration
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => User::ROLES['user'], // Default role for new users
+            'role' => config('roles.roles.org_user'), // Default role for new users
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -52,6 +55,10 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request): JsonResponse
     {
+        if (!Gate::allows('update', Auth::user())) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->update($request->validated());
@@ -67,6 +74,8 @@ class UserController extends Controller
      */
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
+        // No authorization check needed for changing own password
+
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
@@ -123,7 +132,11 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'role' => ['required', 'string', 'in:' . implode(',', User::ROLES)]
+            'role' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (!RoleService::isValidRole($value)) {
+                    $fail('The selected role is invalid.');
+                }
+            }]
         ]);
 
         $user->update([
@@ -135,4 +148,4 @@ class UserController extends Controller
             'user' => $user
         ]);
     }
-} 
+}

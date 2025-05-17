@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Services\RoleService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -27,7 +27,7 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'role' => fake()->randomElement(User::getAvailableRoles()),
+            'role' => fake()->randomElement(array_values(config('roles.roles'))),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
@@ -55,18 +55,26 @@ class UserFactory extends Factory
     }
 
     /**
-     * Create an admin user.
+     * Create a super admin user.
      */
-    public function admin(): static
+    public function superAdmin(): static
     {
-        return $this->role('admin');
+        return $this->role(config('roles.roles.super_admin'));
     }
 
     /**
-     * Create a manager user.
+     * Create an organization owner user.
      */
-    public function manager(): static
+    public function orgOwner(): static
     {
-        return $this->role('manager');
+        return $this->role(config('roles.roles.org_owner'));
+    }
+
+    /**
+     * Create a regular organization user.
+     */
+    public function orgUser(): static
+    {
+        return $this->role(config('roles.roles.org_user'));
     }
 }

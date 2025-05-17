@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,28 +12,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create owner user
-        User::factory()->owner()->create([
-            'name' => 'Owner User',
-            'email' => 'owner@example.com',
-            'password' => bcrypt('password'),
-        ]);
-
-        // Create admin user
-        User::factory()->admin()->create([
-            'name' => 'Admin User',
+        // Create super admin user
+        User::factory()->create([
+            'name' => 'Super Admin',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
+            'role' => config('roles.roles.super_admin')
         ]);
 
-        // Create regular user
-        User::factory()->user()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create organization owner
+        User::factory()->create([
+            'name' => 'Organization Owner',
+            'email' => 'owner@example.com',
             'password' => bcrypt('password'),
+            'role' => config('roles.roles.org_owner')
         ]);
 
-        // Create additional random users
-        User::factory(10)->create();
+        // Create regular organization user
+        User::factory()->create([
+            'name' => 'Organization User',
+            'email' => 'user@example.com',
+            'password' => bcrypt('password'),
+            'role' => config('roles.roles.org_user')
+        ]);
+
+        // Create additional random organization users
+        User::factory(10)->create(['role' => config('roles.roles.org_user')]);
     }
 }

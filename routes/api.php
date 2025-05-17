@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\OrganizationController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,4 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Owner only routes
         Route::post('/{user}/change-role', [UserController::class, 'changeRole']);
     });
+
+    // Vendor routes
+    Route::apiResource('vendors', VendorController::class);
+
+    // Organization routes
+    Route::apiResource('organizations', OrganizationController::class);
 });
+

@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
+    /**
+     * Authenticate user 
+     * @param Request $request The request containing email and password
+     * @return JsonResponse The response containing access token, refresh token and user data
+     * @throws ValidationException When credentials are invalid
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -47,6 +54,12 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Logout user.
+     *
+     * @param Request $request The request containing the authenticated user
+     * @return JsonResponse A success message
+     */
     public function logout(Request $request)
     {
         /** @var User $user */
@@ -60,6 +73,13 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Refresh the authentication tokens.
+     *
+     * 
+     * @param Request $request The request containing the refresh token
+     * @return JsonResponse New access and refresh tokens
+     */
     public function refreshToken(Request $request)
     {
         /** @var User $user */
@@ -92,6 +112,12 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Get the authenticated user's profile.
+     *
+     * @param Request $request The request containing the authenticated user
+     * @return JsonResponse The authenticated user's data
+     */
     public function me(Request $request)
     {
         return response()->json($request->user());

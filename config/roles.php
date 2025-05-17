@@ -12,9 +12,9 @@ return [
     */
 
     'roles' => [
-        'owner' => 'owner',
-        'admin' => 'admin',
-        'user' => 'user',
+        'super_admin' => 'super_admin',  // System-wide admin with all permissions
+        'org_owner' => 'org_owner',      // Organization owner
+        'org_user' => 'org_user',        // Regular organization user
     ],
 
     /*
@@ -23,13 +23,12 @@ return [
     |--------------------------------------------------------------------------
     |
     | Define which roles have access to other roles' permissions.
-    | For example, owner has access to all admin permissions.
     |
     */
     'hierarchies' => [
-        'owner' => ['admin', 'user'],
-        'admin' => ['user'],
-        'user' => [],
+        'super_admin' => ['org_owner', 'org_user'],
+        'org_owner' => ['org_user'],
+        'org_user' => [],
     ],
 
     /*
@@ -41,18 +40,24 @@ return [
     |
     */
     'permissions' => [
-        'owner' => [
-            'manage_users',
-            'manage_settings',
-            'view_reports',
-            'manage_roles',
+        'super_admin' => [
+            'manage_organizations',
+            'manage_all_users',
+            'view_all_data',
+            'manage_system_settings',
         ],
-        'admin' => [
-            'manage_users',
-            'view_reports',
+        'org_owner' => [
+            'manage_org_settings',
+            'manage_org_users',
+            'manage_vendors',
+            'view_org_reports',
+            'delete_vendors',
         ],
-        'user' => [
-            'view_reports',
+        'org_user' => [
+            'view_vendors',
+            'create_vendors',
+            'edit_vendors',
+            'view_org_data',
         ],
     ],
-]; 
+];

@@ -13,7 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
-        $middleware->trustHosts(at: [parse_url(env('APP_URL'), PHP_URL_HOST)]);
+        $appUrl = env('APP_URL');
+        $middleware->trustHosts(at: $appUrl ? [parse_url($appUrl, PHP_URL_HOST)] : []);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
