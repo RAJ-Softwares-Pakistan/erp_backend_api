@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\WarehouseController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -33,9 +34,27 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Vendor routes
+    Route::prefix('vendors')->group(function () {
+        Route::get('/trashed', [VendorController::class, 'trashed']);
+        Route::post('/{id}/restore', [VendorController::class, 'restore']);
+        Route::delete('/{id}/force', [VendorController::class, 'forceDelete']);
+    });
     Route::apiResource('vendors', VendorController::class);
 
     // Organization routes
+    Route::prefix('organizations')->group(function () {
+        Route::get('/trashed', [OrganizationController::class, 'trashed']);
+        Route::post('/{id}/restore', [OrganizationController::class, 'restore']);
+        Route::delete('/{id}/force', [OrganizationController::class, 'forceDelete']);
+    });
     Route::apiResource('organizations', OrganizationController::class);
+
+    // Warehouse routes
+    Route::prefix('warehouses')->group(function () {
+        Route::get('/trashed', [WarehouseController::class, 'trashed']);
+        Route::post('/{id}/restore', [WarehouseController::class, 'restore']);
+        Route::delete('/{id}/force', [WarehouseController::class, 'forceDelete']);
+    });
+    Route::apiResource('warehouses', WarehouseController::class);
 });
 

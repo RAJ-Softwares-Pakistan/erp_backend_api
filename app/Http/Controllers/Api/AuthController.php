@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Http\JsonResponse;
@@ -27,6 +28,11 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
+            Log::channel('auth')->warning('Failed login attempt', [
+                'email' => $request->email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -34,6 +40,12 @@ class AuthController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
+        
+        Log::channel('auth')->info('User logged in successfully', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip' => $request->ip(),
+        ]);
         
         // Revoke existing tokens if needed
         $user->tokens()->where('name', 'auth_token')->delete();
@@ -55,18 +67,24 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user.
+     * Logout the authenticated user by revoking their tokens.
      *
-     * @param Request $request The request containing the authenticated user
-     * @return JsonResponse A success message
+     * @param  Request  $request The request containing the authenticated user
+     * @return JsonResponse A success message indicating the user was logged out
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
-        
+
         // Revoke all tokens
         $user->tokens()->delete();
+
+        Log::channel('auth')->info('User logged out', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip' => $request->ip(),
+        ]);
 
         return response()->json([
             'message' => 'Logged out successfully',

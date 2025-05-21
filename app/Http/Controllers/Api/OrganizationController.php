@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrganizationRequest;
 use App\Http\Requests\UpdateOrganizationRequest;
+use App\Http\Requests\RestoreOrganizationRequest;
 use App\Models\Organization;
 use App\Models\User;
 use App\Services\RoleService;
+use App\Traits\HasPaginatedList;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
@@ -16,21 +19,48 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrganizationController extends Controller
 {
+    use HasPaginatedList;
+
     /**
      * List all organizations.
      * 
-     * 
+     * @param Request $request The request with pagination parameters
      * @return JsonResponse Paginated list of organizations with their root users
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         if (!Gate::allows('viewAny', Organization::class)) {
             throw new AuthorizationException('This action is unauthorized.');
         }
 
-        $organizations = Auth::user()->role === config('roles.roles.super_admin')
-            ? Organization::with('rootUser')->paginate()
-            : Organization::where('root_user_id', Auth::id())->with('rootUser')->paginate();
+        $query = Auth::user()->role === config('roles.roles.super_admin')
+            ? Organization::with('rootUser')
+            : Organization::where('root_user_id', Auth::id())->with('rootUser');
+
+        $organizations = $this->paginateQuery($request, $query);
+
+        return response()->json($organizations);
+    }
+
+    /**
+     * List soft-deleted organizations.
+     * 
+     * @param Request $request The request with pagination parameters
+     * @return JsonResponse Paginated list of soft-deleted organizations
+     */
+    public function trashed(Request $request): JsonResponse
+    {
+        if (!Gate::allows('viewAny', Organization::class)) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
+
+        $query = Auth::user()->role === config('roles.roles.super_admin')
+            ? Organization::onlyTrashed()->with('rootUser')
+            : Organization::onlyTrashed()
+                ->where('root_user_id', Auth::id())
+                ->with('rootUser');
+
+        $organizations = $this->paginateQuery($request, $query);
 
         return response()->json($organizations);
     }
@@ -104,6 +134,43 @@ class OrganizationController extends Controller
         }
 
         $organization->delete();
+        return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Restore a soft-deleted organization.
+     * 
+     * @param string $id The ID of the organization to restore
+     * @param RestoreOrganizationRequest $request The validated restore request
+     * @return JsonResponse The restored organization resource
+     */
+    public function restore(string $id, RestoreOrganizationRequest $request): JsonResponse
+    {
+        $organization = Organization::onlyTrashed()->findOrFail($id);
+
+        if (!Gate::allows('restore', $organization)) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
+
+        $organization->restore();
+        return response()->json($organization);
+    }
+
+    /**
+     * Permanently delete a soft-deleted organization.
+     * 
+     * @param string $id The ID of the organization to permanently delete
+     * @return JsonResponse Empty response with 204 status code
+     */
+    public function forceDelete(string $id): JsonResponse
+    {
+        $organization = Organization::onlyTrashed()->findOrFail($id);
+
+        if (!Gate::allows('forceDelete', $organization)) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
+
+        $organization->forceDelete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

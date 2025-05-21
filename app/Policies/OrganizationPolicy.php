@@ -31,4 +31,14 @@ class OrganizationPolicy
     {
         return true;
     }
+
+    public function restore(User $user, Organization $organization): bool
+    {
+        return true;
+    }
+
+    public function forceDelete(User $user, Organization $organization): bool
+    {
+        return true;
+    }
 }

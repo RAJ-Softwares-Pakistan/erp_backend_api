@@ -49,6 +49,20 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the fields that should be searchable.
+     *
+     * @return array
+     */
+    public function getSearchableFields(): array
+    {
+        return [
+            'name',
+            'email',
+            'role'
+        ];
+    }
+
+    /**
      * Check if user has a specific role
      */
     public function hasRole(string $role): bool

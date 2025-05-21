@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User;
 use App\Services\RoleService;
+use App\Traits\HasPaginatedList;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
+    use HasPaginatedList;
+
     /**
      * Register a new user
      */
@@ -96,14 +99,19 @@ class UserController extends Controller
 
     /**
      * List all users (Admin and Owner only)
+     * 
+     * @param Request $request The request with pagination parameters
+     * @return JsonResponse Paginated list of users
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         if (!Gate::allows('viewAny', User::class)) {
             throw new AuthorizationException('This action is unauthorized.');
         }
         
-        $users = User::all();
+        $query = User::query();
+        $users = $this->paginateQuery($request, $query);
+        
         return response()->json($users);
     }
 

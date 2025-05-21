@@ -38,4 +38,14 @@ class VendorPolicy
     {
         return true;
     }
+
+    public function restore(User $user, Vendor $vendor): bool
+    {
+        return true;
+    }
+
+    public function forceDelete(User $user, Vendor $vendor): bool
+    {
+        return true;
+    }
 }

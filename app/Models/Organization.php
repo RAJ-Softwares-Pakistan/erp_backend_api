@@ -34,6 +34,23 @@ class Organization extends Model
         'enable_witholding' => 'boolean',
     ];
 
+    /**
+     * Get the fields that should be searchable.
+     *
+     * @return array
+     */
+    public function getSearchableFields(): array
+    {
+        return [
+            'name',
+            'email',
+            'phone',
+            'website',
+            'ntn_no',
+            'industry_type'
+        ];
+    }
+
     public function rootUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'root_user_id');
@@ -47,5 +64,10 @@ class Organization extends Model
     public function vendors(): HasMany
     {
         return $this->hasMany(Vendor::class, 'organization_id');
+    }
+
+    public function warehouses(): HasMany
+    {
+        return $this->hasMany(Warehouse::class, 'organization_id');
     }
 }

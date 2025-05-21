@@ -7,16 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Vendor extends Model
+class Warehouse extends Model
 {
     use HasFactory, SoftDeletes;
-
+    
     protected $fillable = [
+        'organization_id',
         'name',
-        'contact_person',
-        'phone',
-        'email',
-        'organization_id'
+        'location'
     ];
 
     /**
@@ -28,12 +26,13 @@ class Vendor extends Model
     {
         return [
             'name',
-            'contact_person',
-            'phone',
-            'email'
+            'location'
         ];
     }
 
+    /**
+     * Get the organization that owns the warehouse.
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'organization_id');
