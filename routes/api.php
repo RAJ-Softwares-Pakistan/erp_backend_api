@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VendorController;
-use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\WarehouseController;
+use App\Http\Controllers\Api\OrganizationController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -33,14 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{user}/change-role', [UserController::class, 'changeRole']);
     });
 
-    // Vendor routes
-    Route::prefix('vendors')->group(function () {
-        Route::get('/trashed', [VendorController::class, 'trashed']);
-        Route::post('/{id}/restore', [VendorController::class, 'restore']);
-        Route::delete('/{id}/force', [VendorController::class, 'forceDelete']);
-    });
-    Route::apiResource('vendors', VendorController::class);
-
     // Organization routes
     Route::prefix('organizations')->group(function () {
         Route::get('/trashed', [OrganizationController::class, 'trashed']);
@@ -48,6 +40,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}/force', [OrganizationController::class, 'forceDelete']);
     });
     Route::apiResource('organizations', OrganizationController::class);
+
+    // Vendor routes
+    Route::prefix('vendors')->group(function () {
+        Route::get('/trashed', [VendorController::class, 'trashed']);
+        Route::post('/{id}/restore', [VendorController::class, 'restore']);
+        Route::delete('/{id}/force', [VendorController::class, 'forceDelete']);
+    });
+    Route::apiResource('vendors', VendorController::class);
 
     // Warehouse routes
     Route::prefix('warehouses')->group(function () {
@@ -57,4 +57,3 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::apiResource('warehouses', WarehouseController::class);
 });
-
