@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateOrganizationRequest;
 use App\Http\Requests\RestoreOrganizationRequest;
 use App\Models\Organization;
 use App\Models\User;
-use App\Services\RoleService;
 use App\Traits\HasPaginatedList;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

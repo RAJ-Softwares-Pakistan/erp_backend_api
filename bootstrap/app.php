@@ -48,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Application Providers
         \App\Providers\AppServiceProvider::class,           // App bootstrapping
+        \App\Providers\AuthServiceProvider::class,
         \App\Providers\RouteServiceProvider::class,         // API routing & rate limiting
     ])
     ->withSchedule(function ($schedule) {
